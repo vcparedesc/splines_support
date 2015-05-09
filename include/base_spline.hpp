@@ -30,6 +30,11 @@ private:
 
 	/* Vector of Cubic-Spline parameters */
 	VectorXd lambda;
+
+	/* Useful Interprocess Matrices (to save computation time) */
+	MatrixXd timeBlock;
+	VectorXd splineOutput;
+	VectorXd reducedLambda;
 public:
 	void addEqualityConstraint();
 	void addInequalityConstraint();

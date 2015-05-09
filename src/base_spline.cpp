@@ -24,4 +24,14 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 {
 	double timeInterval = this->tConvergence;
 	double indexSpline = floor(time_parameter / timeInterval);
+	VectorXd Outputs;
+	MatrixXd timeBlock;
+
+	// Make Sure the index spline is in the correct range
+	if(indexSpline >= nSplines)
+		indexSpline = nSplines;
+
+	this->splineOutput = this->timeBlock * reducedLambda;
+
+	return this->splineOutput;
 }
