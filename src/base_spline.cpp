@@ -141,7 +141,19 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, int optimization_type
 
 SplineSupport::~SplineSupport(void)
 {
-
+	/* Freeing Memory! */
+	A.resize(0,0);
+	b.resize(0);
+	C.resize(0,0);
+	d.resize(0);
+	F.resize(0,0);
+	g.resize(0);
+	aA.resize(0,0);
+	ab.resize(0);
+	aC.resize(0,0);
+	ad.resize(0);
+	N.resize(0,0);
+	X.resize(0);
 }
 
 MatrixXd SplineSupport::nBlockDiag(MatrixXd basal_matrix, int n_repetitions)
