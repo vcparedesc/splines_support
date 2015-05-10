@@ -102,18 +102,15 @@ include_directories(
  add_library(base_spline
    src/base_spline.cpp include/base_spline.hpp
 )
-
-## Declare a cpp executable
-add_executable(example_spline_node src/example_spline.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-add_dependencies(example_spline_node base_spline_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
  target_link_libraries(base_spline
    ${catkin_LIBRARIES}
  )
+
+## Declare a cpp executable
+add_executable(example_spline_node src/example_spline.cpp)
+target_link_libraries(example_spline_node base_spline)
+
+## Specify libraries to link a library or executable target against
 
 #############
 ## Install ##
