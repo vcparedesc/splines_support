@@ -8,6 +8,8 @@ class SplineSupport
 {
 private:
 	MatrixXd nBlockDiag(MatrixXd basal_matrix, int n_repetitions);
+	void buildNormalVector();
+
 
 	int typeOptimization; // 0: Equality Constraint, 1: Equality and Inequality Constraint
 	int readyFlag; // Indicates that all conditions are set
@@ -24,6 +26,9 @@ private:
 	VectorXd g;
 	/* Slack variable normalizer: u * || sx || */
 	double uNormal;
+
+	/* Velocity Limit */
+	double vLimit;
 
 	/* Augmented Matrices considering slack variables */
 	MatrixXd aA;
@@ -49,11 +54,13 @@ private:
 	VectorXd splineOutput;
 	VectorXd reducedLambda;
 public:
-	SplineSupport(int n_splines, int n_outputs, int optimization_type);
+	SplineSupport(int n_splines, int n_outputs, double normalizer, double time_switch, double time_convergence);
 	~SplineSupport(void);
 	void addBoundaryConditions(VectorXd P1, VectorXd P2, VectorXd DP1, VectorXd DP2, VectorXd DDP1, VectorXd DDP2);
-	void addInequalityConstraint();
-	void setNormalizer();
+	void addInequalityConstraint(double limit);
+	void setNormalizer(double normalizer);
+	VectorXd referenceTraj(int time_parameter);
 	VectorXd computeOutput(double time_parameter);
+	void buildReferenceVector();
 
 };

@@ -1,10 +1,8 @@
 #include "base_spline.hpp"
 
-SplineSupport::SplineSupport(int n_splines, int n_outputs, int optimization_type): nSplines(n_splines), nOutputs(n_outputs), typeOptimization(optimization_type)
+SplineSupport::SplineSupport(int n_splines, int n_outputs, double normalizer, double time_switch, double time_convergence): nSplines(n_splines), nOutputs(n_outputs), uNormal(normalizer), tSwitch(time_switch), tConvergence(time_convergence)
 {
 	double Dti;
-	uNormal = 0.001;
-	tConvergence = 0.2;
 	MatrixXd tA = MatrixXd::Zero(nSplines + 1, nSplines * 4);
 
 	VectorXd tb = VectorXd::Zero(nSplines + 1);
@@ -131,11 +129,11 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, int optimization_type
 	/* Building Normal Matrix */
 	N.block(0,0, aA.cols(), aA.cols()) = 2 * aA.transpose() * aA;
 	N.block(0, aA.cols(), aC.cols(), aC.rows()) = aC.transpose();
-	std::cout<<"here"<<std::endl;
+	
 	N.block(aA.cols(), 0, aC.rows(), aC.cols()) = aC;
 	N.block(aA.cols(), aC.rows(), aC.rows(), aC.rows()) = MatrixXd::Zero(aC.rows(), aC.rows());
-
-	std::cout<<N<<std::endl;
+	// We don't need to invert the matrix since it's ill conditioned, intead we will solve it using a decomposition.
+	//std::cout<<N<<std::endl;
 
 }
 
@@ -156,6 +154,13 @@ SplineSupport::~SplineSupport(void)
 	X.resize(0);
 }
 
+VectorXd SplineSupport::referenceTraj(int time_parameter)
+{
+	VectorXd reference = VectorXd::Zero(nOutputs);
+
+	return reference;
+}
+
 MatrixXd SplineSupport::nBlockDiag(MatrixXd basal_matrix, int n_repetitions)
 {
 	MatrixXd nBlockMatrix = MatrixXd::Zero(basal_matrix.rows() * n_repetitions, basal_matrix.cols() * n_repetitions);
@@ -170,17 +175,37 @@ MatrixXd SplineSupport::nBlockDiag(MatrixXd basal_matrix, int n_repetitions)
 
 void SplineSupport::addBoundaryConditions(VectorXd P1, VectorXd P2, VectorXd DP1, VectorXd DP2, VectorXd DDP1, VectorXd DDP2)
 {
+	
+	for (int i = 0; i < nOutputs; i++)
+	{
+		// Position boundaries
+		d((nSplines + 1) * i) = P1(i);
+		d((nSplines + 1) * (i + 1) - 1) = P2(i);
 
+		// Velocity Boundaries
+		d((nSplines + 1) * nOutputs + (nSplines + 1) * i) = DP1(i);
+		d((nSplines + 1) * nOutputs + (nSplines + 1) * (i + 1) - 1) = DP2(i);
+
+		// Acceleration Boundariesa
+		d((nSplines + 1) * nOutputs * 2 + (nSplines + 1) * i) = DDP1(i);
+		d((nSplines + 1) * nOutputs * 2 + (nSplines + 1) * (i + 1) - 1) = DDP2(i);
+	}
+	
 }
 
-void SplineSupport::addInequalityConstraint()
+void SplineSupport::addInequalityConstraint(double limit)
 {
-
+	vLimit = limit;
+	
+	for(int i = 0; i < (nSplines + 1) * nOutputs; i++)
+	{
+		g(i) = vLimit;
+	}
 }
 
-void SplineSupport::setNormalizer()
+void SplineSupport::setNormalizer(double normalizer)
 {
-
+	uNormal = normalizer;
 }
 
 VectorXd SplineSupport::computeOutput(double time_parameter)
@@ -203,4 +228,29 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 	}
 
 	return this->splineOutput;
+}
+
+void SplineSupport::buildNormalVector()
+{
+	ad.segment(0, (nSplines + 1) * nOutputs * 3) = d;
+	ad.segment((nSplines + 1) * nOutputs * 3, (nSplines + 1) * nOutputs) = g;
+	X.segment(0,nSplines * nOutputs * 4) = 2 * aA.transpose() * ab;
+	X.segment(nSplines * nOutputs * 4, (nSplines + 1) * nOutputs * 4) = ad;	
+}
+
+void SplineSupport::buildReferenceVector()
+{
+	double Dti;
+	VectorXd tOuputs = VectorXd::Zero(nOutputs);
+
+	for (int i = 0; i < nSplines + 1; i++)
+	{
+		Dti = (double)(tConvergence * (double)i / nSplines);
+		tOuputs = referenceTraj(tSwitch + Dti);
+		for (int j = 0; j < nOutputs; j++)
+		{
+			b((nSplines + 1) * j + i) = tOuputs(j);
+		}
+	}
+	std::cout<<"Build b"<<b<<std::endl;
 }
