@@ -10,7 +10,8 @@ class SplineSupport
 {
 private:
 	MatrixXd nBlockDiag(MatrixXd basal_matrix, int n_repetitions);
-
+	void buildReferenceVector();
+	void buildNormalVector();
 
 
 	int typeOptimization; // 0: Equality Constraint, 1: Equality and Inequality Constraint
@@ -57,7 +58,6 @@ private:
 
 	/* Useful Interprocess Matrices (to save computation time) */
 	MatrixXd timeBlock;
-	VectorXd splineOutput;
 	VectorXd reducedLambda;
 public:
 	SplineSupport(int n_splines, int n_outputs, double normalizer, double time_switch, double time_convergence);
@@ -68,7 +68,6 @@ public:
 	void solveSplines();
 	virtual VectorXd referenceTraj(double time_parameter);
 	VectorXd computeOutput(double time_parameter);
-	void buildReferenceVector();
-	void buildNormalVector();
+
 
 };

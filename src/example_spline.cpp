@@ -9,6 +9,8 @@ int main(int argc, char ** argv)
 	VectorXd DP2 = VectorXd::Zero(5);
 	VectorXd DDP1 = VectorXd::Zero(5);
 	VectorXd DDP2 =  VectorXd::Zero(5);
+	VectorXd outputs = VectorXd::Zero(5);
+
 	P1 << 0.1008, 1.1933, 0.1542, 0.0488, -0.5269;
 	P2 << 0.2992, 0.8425, 0.7477, -0.2467, -0.0007;
 	DP1 << -0.0007, 0.4600, -0.7760, -0.0110, -0.1654;
@@ -19,9 +21,8 @@ int main(int argc, char ** argv)
 	SplineSupport TrajConnector(4,5,0.001,0.4,0.2);
 	TrajConnector.addInequalityConstraint(3);
 	TrajConnector.addBoundaryConditions(P1,P2,DP1,DP2,DDP1,DDP2);
-	//TrajConnector.buildReferenceVector();
-	//TrajConnector.buildNormalVector();
-		TrajConnector.solveSplines();
-
+	TrajConnector.solveSplines();
+	outputs = TrajConnector.computeOutput(0);
+	std::cout<<"Outputs computed: "<<outputs<<std::endl;
 	return 0;
 }

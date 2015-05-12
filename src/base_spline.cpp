@@ -224,7 +224,7 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 {
 	double timeInterval = this->tConvergence;
 	double indexSpline = floor(time_parameter / timeInterval);
-
+	VectorXd splineOutput = VectorXd::Zero(nOutputs);
 	// Make Sure the index spline is in the correct range
 	if(indexSpline >= nSplines)
 		indexSpline = nSplines;
@@ -235,11 +235,11 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 		for(int j = 0; j < 4; j++)
 		{
 			// Calculate reduced lambda: Lambda set at time_parameter
-			this->splineOutput(i) =  pow(time_parameter,j) * this->lambda(4*nSplines*i + 4*indexSpline + j);
+			splineOutput(i) +=  pow(time_parameter,j) * this->lambda(4*nSplines*i + 4*indexSpline + j);
 		}
 	}
 
-	return this->splineOutput;
+	return splineOutput;
 }
 
 void SplineSupport::solveSplines()
@@ -247,7 +247,6 @@ void SplineSupport::solveSplines()
 	buildNormalVector();
 
 	//lambda = N.jacobiSvd(ComputeThinU | ComputeThinV).solve(X);
-	//lambda = N.fullPivLu().solve(X);
 	lambda = solver.solve(X);
 	std::cout<<"lambda"<<lambda<<std::endl;
 }
