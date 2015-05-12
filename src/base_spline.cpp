@@ -31,12 +31,12 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, double normalizer, do
 	this->F = MatrixXd::Zero((nSplines + 1) * nOutputs, nSplines * nOutputs * 4);
 	this->g = VectorXd::Zero((nSplines + 1) * nOutputs);
 	this->aA = MatrixXd::Zero((nSplines + 1) * nOutputs * 2, nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs);
-	this->ab = VectorXd::Zero(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs);
+	this->ab = VectorXd::Zero((nSplines + 1) * nOutputs * 2);
 	this->aC = MatrixXd::Zero((nSplines + 1) * nOutputs * 4, nSplines *nOutputs * 4 + (nSplines + 1) * nOutputs);
 	this->ad = VectorXd::Zero((nSplines + 1) * nOutputs * 3 + (nSplines + 1)*nOutputs);
 
 	this->N = MatrixXd::Zero(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs * 5, nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs * 5);
-	this->X = VectorXd::Zero(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs);
+	this->X = VectorXd::Zero(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs * 5);
 
 	std::cout<<"Building Basal Spline Matrices"<<std::endl;
 
@@ -131,7 +131,8 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, double normalizer, do
 	N.block(0, aA.cols(), aC.cols(), aC.rows()) = aC.transpose();
 	
 	N.block(aA.cols(), 0, aC.rows(), aC.cols()) = aC;
-	N.block(aA.cols(), aC.rows(), aC.rows(), aC.rows()) = MatrixXd::Zero(aC.rows(), aC.rows());
+	N.block(aA.cols(), aC.cols(), aC.rows(), aC.rows()) = MatrixXd::Zero(aC.rows(), aC.rows());
+	solver = N.fullPivLu();
 	// We don't need to invert the matrix since it's ill conditioned, intead we will solve it using a decomposition.
 	//std::cout<<N<<std::endl;
 
@@ -154,9 +155,14 @@ SplineSupport::~SplineSupport(void)
 	X.resize(0);
 }
 
-VectorXd SplineSupport::referenceTraj(int time_parameter)
+VectorXd SplineSupport::referenceTraj(double time_parameter)
 {
-	VectorXd reference = VectorXd::Zero(nOutputs);
+	VectorXd reference = VectorXd::Zero((nSplines + 1) * nOutputs);
+	
+	for (int i = 0; i < nOutputs; i++)
+	{
+		reference(i) = _P1(i) + (_P2(i) - _P1(i)) / tConvergence * (time_parameter - tSwitch);
+	}
 
 	return reference;
 }
@@ -190,7 +196,13 @@ void SplineSupport::addBoundaryConditions(VectorXd P1, VectorXd P2, VectorXd DP1
 		d((nSplines + 1) * nOutputs * 2 + (nSplines + 1) * i) = DDP1(i);
 		d((nSplines + 1) * nOutputs * 2 + (nSplines + 1) * (i + 1) - 1) = DDP2(i);
 	}
-	
+	// Store them
+	_P1 = P1;
+	_P2 = P2;
+	_DP1 = DP1;
+	_DP2 = DP2;
+	_DDP1 = DDP1;
+	_DDP2 =DDP2;
 }
 
 void SplineSupport::addInequalityConstraint(double limit)
@@ -230,12 +242,23 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 	return this->splineOutput;
 }
 
+void SplineSupport::solveSplines()
+{
+	buildNormalVector();
+
+	//lambda = N.jacobiSvd(ComputeThinU | ComputeThinV).solve(X);
+	//lambda = N.fullPivLu().solve(X);
+	lambda = solver.solve(X);
+	std::cout<<"lambda"<<lambda<<std::endl;
+}
+
 void SplineSupport::buildNormalVector()
 {
+	buildReferenceVector();
 	ad.segment(0, (nSplines + 1) * nOutputs * 3) = d;
 	ad.segment((nSplines + 1) * nOutputs * 3, (nSplines + 1) * nOutputs) = g;
-	X.segment(0,nSplines * nOutputs * 4) = 2 * aA.transpose() * ab;
-	X.segment(nSplines * nOutputs * 4, (nSplines + 1) * nOutputs * 4) = ad;	
+	X.segment(0,nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs) = 2 * aA.transpose() * ab;
+	X.segment(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs, (nSplines + 1) * nOutputs * 4) = ad;	
 }
 
 void SplineSupport::buildReferenceVector()
@@ -252,5 +275,6 @@ void SplineSupport::buildReferenceVector()
 			b((nSplines + 1) * j + i) = tOuputs(j);
 		}
 	}
-	std::cout<<"Build b"<<b<<std::endl;
+
+	ab.segment(0,(nSplines + 1) * nOutputs) = b;
 }

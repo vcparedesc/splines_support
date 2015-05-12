@@ -1,4 +1,6 @@
 #include <eigen3/Eigen/Eigen>
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/IterativeLinearSolvers>
 #include <math.h>
 #include <iostream>
 
@@ -8,7 +10,7 @@ class SplineSupport
 {
 private:
 	MatrixXd nBlockDiag(MatrixXd basal_matrix, int n_repetitions);
-	void buildNormalVector();
+
 
 
 	int typeOptimization; // 0: Equality Constraint, 1: Equality and Inequality Constraint
@@ -39,6 +41,10 @@ private:
 	/* First Optimality Condition: N x* = X --> x* = N^-1 * X */
 	MatrixXd N;
 	VectorXd X;
+	FullPivLU<MatrixXd> solver;
+
+	/* Bounday Condition Vectors */
+	VectorXd _P1, _P2, _DP1, _DP2, _DDP1, _DDP2;
 
 	/* Time-parameter at which we use the splines */
 	double tSwitch;
@@ -59,8 +65,10 @@ public:
 	void addBoundaryConditions(VectorXd P1, VectorXd P2, VectorXd DP1, VectorXd DP2, VectorXd DDP1, VectorXd DDP2);
 	void addInequalityConstraint(double limit);
 	void setNormalizer(double normalizer);
-	VectorXd referenceTraj(int time_parameter);
+	void solveSplines();
+	virtual VectorXd referenceTraj(double time_parameter);
 	VectorXd computeOutput(double time_parameter);
 	void buildReferenceVector();
+	void buildNormalVector();
 
 };
