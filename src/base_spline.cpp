@@ -133,9 +133,7 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, double normalizer, do
 	N.block(aA.cols(), 0, aC.rows(), aC.cols()) = aC;
 	N.block(aA.cols(), aC.cols(), aC.rows(), aC.rows()) = MatrixXd::Zero(aC.rows(), aC.rows());
 	solver = N.fullPivLu();
-	// We don't need to invert the matrix since it's ill conditioned, intead we will solve it using a decomposition.
-	//std::cout<<N<<std::endl;
-
+	//solver = N.jacobiSvd(ComputeThinU | ComputeThinV);
 }
 
 SplineSupport::~SplineSupport(void)
@@ -248,7 +246,6 @@ void SplineSupport::solveSplines()
 
 	//lambda = N.jacobiSvd(ComputeThinU | ComputeThinV).solve(X);
 	lambda = solver.solve(X);
-	std::cout<<"lambda"<<lambda<<std::endl;
 }
 
 void SplineSupport::buildNormalVector()

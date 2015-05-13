@@ -13,6 +13,8 @@ private:
 	void buildReferenceVector();
 	void buildNormalVector();
 
+public:
+
 
 	int typeOptimization; // 0: Equality Constraint, 1: Equality and Inequality Constraint
 	int readyFlag; // Indicates that all conditions are set
@@ -43,6 +45,7 @@ private:
 	MatrixXd N;
 	VectorXd X;
 	FullPivLU<MatrixXd> solver;
+	//JacobiSVD<MatrixXd> solver;
 
 	/* Bounday Condition Vectors */
 	VectorXd _P1, _P2, _DP1, _DP2, _DDP1, _DDP2;
@@ -59,7 +62,7 @@ private:
 	/* Useful Interprocess Matrices (to save computation time) */
 	MatrixXd timeBlock;
 	VectorXd reducedLambda;
-public:
+
 	SplineSupport(int n_splines, int n_outputs, double normalizer, double time_switch, double time_convergence);
 	~SplineSupport(void);
 	void addBoundaryConditions(VectorXd P1, VectorXd P2, VectorXd DP1, VectorXd DP2, VectorXd DDP1, VectorXd DDP2);
