@@ -1,17 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(splines_support)
+set(CMAKE_CXX_FLAGS "-O2") 
+add_definitions(-std=c++0x)
 
-## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  yaml_eigen_utilities
+  roslib_utilities
+  yaml_eigen_utilities
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(GTest REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -95,7 +100,9 @@ catkin_package(
 #include_directories(include)
 include_directories(
 	include
+  test
   ${catkin_INCLUDE_DIRS}
+  ${GTEST_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -109,6 +116,9 @@ include_directories(
 ## Declare a cpp executable
 add_executable(example_spline_node src/example_spline.cpp)
 target_link_libraries(example_spline_node base_spline)
+
+add_executable(test_spline test/test_spline.cpp)
+target_link_libraries(test_spline base_spline ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
 
 ## Specify libraries to link a library or executable target against
 
