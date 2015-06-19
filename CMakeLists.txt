@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(splines_support)
+set(CMAKE_CXX_FLAGS "-O2") 
+add_definitions(-std=c++0x)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -99,16 +101,16 @@ include_directories(
 )
 
 ## Declare a cpp library
- add_library(base_spline
+ add_library(${PROJECT_NAME}
    src/base_spline.cpp include/base_spline.hpp
 )
- target_link_libraries(base_spline
+ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
  )
 
 ## Declare a cpp executable
 add_executable(example_spline_node src/example_spline.cpp)
-target_link_libraries(example_spline_node base_spline)
+target_link_libraries(example_spline_node ${PROJECT_NAME})
 
 ## Specify libraries to link a library or executable target against
 
