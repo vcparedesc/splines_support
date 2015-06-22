@@ -69,6 +69,7 @@ public:
 	void addInequalityConstraint(double limit);
 	void setNormalizer(double normalizer);
 	void solveSplines();
+	void setSwitichingTime(double time_parameter);
 	virtual VectorXd referenceTraj(double time_parameter);
 	VectorXd computeOutput(double time_parameter);
 	VectorXd computeDotOutput(double time_parameter);

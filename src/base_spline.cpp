@@ -302,3 +302,7 @@ void SplineSupport::buildReferenceVector()
 }
 
 
+void SplineSupport::setSwitichingTime(double time_parameter)
+{
+  this->tSwitch = time_parameter;
+}
