@@ -220,12 +220,12 @@ void SplineSupport::setNormalizer(double normalizer)
 
 VectorXd SplineSupport::computeOutput(double time_parameter)
 {
-	double timeInterval = this->tConvergence;
+	double timeInterval = this->tConvergence / (double)nSplines;
 	double indexSpline = floor(time_parameter / timeInterval);
 	VectorXd splineOutput = VectorXd::Zero(nOutputs);
 	// Make Sure the index spline is in the correct range
 	if(indexSpline >= nSplines)
-		indexSpline = nSplines;
+		indexSpline = nSplines - 1;
 
 
 	for (int i = 0; i < nOutputs; i++)
@@ -238,6 +238,28 @@ VectorXd SplineSupport::computeOutput(double time_parameter)
 	}
 
 	return splineOutput;
+}
+
+VectorXd SplineSupport::computeDotOutput(double time_parameter)
+{
+  double timeInterval = this->tConvergence / (double)nSplines;
+  double indexSpline = floor(time_parameter / timeInterval);
+  VectorXd splineOutput = VectorXd::Zero(nOutputs);
+  // Make Sure the index spline is in the correct range
+  if(indexSpline >= nSplines)
+          indexSpline = nSplines - 1;
+
+
+  for (int i = 0; i < nOutputs; i++)
+  {
+          for(int j = 1; j < 4; j++)
+          {
+                  // Calculate reduced lambda: Lambda set at time_parameter
+                  splineOutput(i) +=  pow(time_parameter,j-1) * j * this->lambda(4*nSplines*i + 4*indexSpline + j);
+          }
+  }
+
+  return splineOutput;
 }
 
 void SplineSupport::solveSplines()
@@ -257,6 +279,10 @@ void SplineSupport::buildNormalVector()
 	X.segment(nSplines * nOutputs * 4 + (nSplines + 1) * nOutputs, (nSplines + 1) * nOutputs * 4) = ad;	
 }
 
+/**
+ * @brief SplineSupport::buildReferenceVector
+ * Create waypoints as reference for the spline generator
+ */
 void SplineSupport::buildReferenceVector()
 {
 	double Dti;
@@ -274,3 +300,5 @@ void SplineSupport::buildReferenceVector()
 
 	ab.segment(0,(nSplines + 1) * nOutputs) = b;
 }
+
+

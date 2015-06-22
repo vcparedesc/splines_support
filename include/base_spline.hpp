@@ -71,6 +71,7 @@ public:
 	void solveSplines();
 	virtual VectorXd referenceTraj(double time_parameter);
 	VectorXd computeOutput(double time_parameter);
+	VectorXd computeDotOutput(double time_parameter);
 
 
 };
