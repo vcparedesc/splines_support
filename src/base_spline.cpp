@@ -107,9 +107,9 @@ SplineSupport::SplineSupport(int n_splines, int n_outputs, double normalizer, do
 
 	std::cout<<"Obtaining Block Diagonal Matrices"<<std::endl;
 	A = nBlockDiag(tA,nOutputs);
-	C.block((nSplines + 1) * nOutputs * 0,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tPos,5);
-	C.block((nSplines + 1) * nOutputs * 1,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tVel,5);
-	C.block((nSplines + 1) * nOutputs * 2,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tAcc,5);
+	C.block((nSplines + 1) * nOutputs * 0,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tPos,nOutputs);
+	C.block((nSplines + 1) * nOutputs * 1,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tVel,nOutputs);
+	C.block((nSplines + 1) * nOutputs * 2,0, (nSplines + 1) * nOutputs, nSplines * nOutputs * 4 ) = nBlockDiag(tAcc,nOutputs);
 
 	F = nBlockDiag(tF, nOutputs);
 

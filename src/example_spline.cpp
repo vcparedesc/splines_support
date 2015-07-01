@@ -18,6 +18,7 @@ int main(int argc, char ** argv)
     DDP1 << 0.0194, -22.1782, -1.2521, -0.0465, 19.6795;
     DDP2 << 5.2354, -4.9979, -14.4895, 1.2320, -19.5341;
 
+    SplineSupport Traj(3,2,0.01, 0.4, 0.2);
     SplineSupport TrajConnector(4,5,0.001,0.4,0.2);
     TrajConnector.addInequalityConstraint(3);
     TrajConnector.addBoundaryConditions(P1,P2,DP1,DP2,DDP1,DDP2);
