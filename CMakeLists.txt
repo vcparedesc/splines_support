@@ -106,19 +106,19 @@ include_directories(
 )
 
 ## Declare a cpp library
- add_library(base_spline
+ add_library(${PROJECT_NAME}
    src/base_spline.cpp include/base_spline.hpp
 )
- target_link_libraries(base_spline
+ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
  )
 
 ## Declare a cpp executable
 add_executable(example_spline_node src/example_spline.cpp)
-target_link_libraries(example_spline_node base_spline)
+target_link_libraries(example_spline_node ${PROJECT_NAME})
 
 add_executable(test_spline test/test_spline.cpp)
-target_link_libraries(test_spline base_spline ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_spline ${PROJECT_NAME} ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
 
 ## Specify libraries to link a library or executable target against
 
