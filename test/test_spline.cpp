@@ -105,6 +105,37 @@ TEST(SplineSupportTest, BuildingTest)
 
 }
 
+TEST(SplineSupportTest, TrajectoryIntegrity)
+{
+    VectorXd P1 = VectorXd::Zero(1);
+    VectorXd P2 = VectorXd::Zero(1);
+    VectorXd DP1 = VectorXd::Zero(1);
+    VectorXd DP2 = VectorXd::Zero(1);
+    VectorXd DDP1 = VectorXd::Zero(1);
+    VectorXd DDP2 =  VectorXd::Zero(1);
+    VectorXd outputs = VectorXd::Zero(1);
+
+    P1 << 0.6109;
+    P2 << 0.1008;
+    DP1 << 0;
+    DP2 << 0;
+    DDP1 << 0;
+    DDP2 << 0;
+
+    SplineSupport TrajConnector(4,1,0.001,0,0.4212);
+    TrajConnector.addInequalityConstraint(3);
+    TrajConnector.addBoundaryConditions(P1,P2,DP1,DP2,DDP1,DDP2);
+    TrajConnector.solveSplines();
+
+    std::cout<<"OUTPUT: "<<std::endl;
+
+    for(int i = 1; i < 100; i ++)
+    {
+        outputs << TrajConnector.computeOutput(i / 99.0 * 0.4212);
+        std::cout<<outputs<<std::endl;
+    }
+}
+
 
 int main(int argc, char ** argv)
 {
